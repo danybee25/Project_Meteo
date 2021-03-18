@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mountain Data</title>
+
+     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+   integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+   crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+   integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+   crossorigin=""></script>
+    	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+	<link href="https://fonts.googleapis.com/css?family=Montserrat&display=swap" rel="stylesheet">
+
+	<style type="text/css">
+
+	#mapid { height: 400px; margin: 10px; }
+		body{
+		  /* background: rgb(54,217,182);*/
+          margin:0px;
+        padding:0px;
+        width:100%;
+		  background: linear-gradient(90deg, rgba(54,217,182,1) 0%, rgba(32,152,126,1) 43%, rgba(0,212,255,1) 100%);
+		}
+
+
+		h1, h2, h3, h4, h5, p, span, strike{
+		  font-family: 'Montserrat', sans-serif;
+
+		}
+
+        .container {
+            display: flex;
+            min-width: 100%;
+        }
+
+
+		#task-container{
+		  /*max-width:600px;*/
+		  margin:0 auto;
+		  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+		  background-color: #fff;
+
+		  margin-top:100px;
+		  margin-bottom:100px;
+
+		  justify-content: space-around;
+		  align-items: flex-start;
+
+		}
+
+
+        .map-container {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            margin: auto;
+        }
+
+		#form-wrapper{
+		  position: -webkit-sticky;
+		  position: sticky;
+		  top: 0rem;
+		  border-bottom: 1px solid  #e9e9e9;
+		  background-color: #fff;
+		  box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+ 		  padding:40px;
+		}
+
+		#submit{
+		  background-color: #36d9b6;
+		  border-radius: 0;
+		  border:0;
+		  color: #fff;
+		}
+
+		.flex-wrapper{
+			display: flex;
+		}
+
+		.task-wrapper{
+		  	margin:5px;
+		  	padding: 5px;
+		  	padding:20px;
+		  	cursor: pointer;
+		  	border-bottom: 1px solid  #e9e9e9;
+		  	color: #686868;
+			}
+
+		.custom-input input {
+		    max-width: 80% !important;
+		}
+
+	</style>
+</head>
+<body>
+
+    <div class="container">
+
+		<div id="task-container">
+			<div id="form-wrapper">
+				<form id="form">
+					<div class="flex-wrapper">
+						<div class="row ">
+                            <div class="custom-input row-cols-2">
+                                <input id="title" class="form-control" type="text" name="title" placeholder="Mountain Name" required ><br>
+
+                            </div>
+                            <div class="custom-input row-cols-2">
+                                <input id="title-2" class="form-control" type="text" name="title" placeholder="Altitude" required><br>
+
+                            </div>
+                            <div class="custom-input row-cols-2">
+                                <input id="title-3" class="form-control" type="text" name="title" placeholder="Longitude" required><br>
+                            </div>
+
+                            <div class="custom-input row-cols-2">
+                            <input id="title-4" class="form-control" type="text" name="title" placeholder="Latitude" required><br>
+                            </div>
+						</div>
+						<div style="flex: 1">
+							<input id="submit" class="btn" type="submit" >
+						</div>
+					</div>
+				</form>
+			</div>
+
+			<div id="list-wrapper">
+
+			</div>
+        </div>
+        
+        <div class="map-container">
+            <div id="mapid"></div>
+        </div>
+
+	</div>
+    <script type="text/javascript">
+    var mymap = L.map('mapid').setView([51.505, -0.09], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    maxZoom: 18,
+    id: 'mapbox/streets-v11',
+    tileSize: 512,
+    zoomOffset: -1,
+    accessToken: 'your.mapbox.access.token'
+}).addTo(mymap);
+
+
+        function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+        var csrftoken = getCookie('csrftoken');
+
+        var ActiveItem = null
+
+        buildList()
+        function buildList(){
+			var wrapper = document.getElementById('list-wrapper')
+            wrapper.innerHTML = ''
+			var url = 'http://127.0.0.1:8000/api/mountain-list/'
+			fetch(url)
+			.then((resp) => resp.json())
+			.then(function(data){
+			    console.log('Data:', data)
+
+			    var list = data
+				for (var i in list){
+				var item = `
+						<div id="data-row-${i}" class="task-wrapper flex-wrapper">
+							<div style="flex:7">
+								<span class="title">${list[i].name}</>
+							</div>
+							<div style="flex:1">
+								<button class="btn btn-sm btn-outline-info edit">Edit </button>
+							</div>
+							<div style="flex:1">
+								<button class="btn btn-sm btn-outline-info plot">Plot </button>
+							</div>
+							<div style="flex:1">
+								<button class="btn btn-sm btn-outline-dark delete">-</button>
+							</div>
+
+						</div>
+					`
+					wrapper.innerHTML += item
+
+				}
+				for (var i in list){
+				var editBtn = document.getElementsByClassName('edit')[i]
+                var deleteBtn = document.getElementsByClassName('delete')[i]
+                var plotBtn = document.getElementsByClassName('plot')[i]
+
+
+                    editBtn.addEventListener('click', (function(item){
+                    return function(){
+                        editItem(item)
+                    }
+
+                    })(list[i]))
+
+
+                    deleteBtn.addEventListener('click', (function(item){
+                    return function(){
+                        deleteItem(item)
+                    }
+
+                    })(list[i]))
+
+                    plotBtn.addEventListener('click', (function(item){
+                    return function(){
+                        plotItem(item)
+                    }
+
+                    })(list[i]))
+				}
+			})
+            }
+
+           var form = document.getElementById('form-wrapper')
+           form.addEventListener('submit', function(e){
+              e.preventDefault()
+              console.log('Form submitted')
+              var url = 'http://127.0.0.1:8000/api/mountain-create/'
+
+              if(activeItem!=null){
+              var url = `http://127.0.0.1:8000/api/mountain-update/${activeItem.id}`
+              activeItem = null
+
+              }
+
+              var name = document.getElementById('title').value
+              var altitude = document.getElementById('title-2').value
+              var longitude = document.getElementById('title-3').value
+              var latitude = document.getElementById('title-4').value
+
+              fetch(url, {
+                method: 'POST',
+                headers:{
+                        'Content-type':'application/json',
+                        'X-CSRFToken': csrftoken,
+                },
+                body: JSON.stringify({name, longitude, latitude, altitude})
+              }
+
+              ).then(function(response){
+              buildList()
+              document.getElementById('form').reset()
+              })
+           })
+            function editItem(item){
+            console.log('Item Clicked:', item)
+            activeItem = item
+            document.getElementById('title').value = activeItem.name
+            document.getElementById('title-2').value = activeItem.altitude
+            document.getElementById('title-3').value = activeItem.longitude
+            document.getElementById('title-4').value = activeItem.latitude
+           }
+
+           function deleteItem(item){
+           console.log('Delete Clicked')
+           fetch(`http://127.0.0.1:8000/api/mountain-delete/${item.id}`, {
+                    method: 'DELETE',
+                    headers:{
+                        'Content-type':'application/json',
+                        'X-CSRFToken': csrftoken,
+                },
+
+           }).then((response) => {
+           buildList()
+           })
+           }
+
+           function plotItem(item) {
+            var bounds = L.latLngBounds()
+                console.log("item", item);
+                const latlong = [Number(item.latitude), Number(item.longitude)]
+                const marker = L.marker(latlong).addTo(mymap);
+                marker.bindPopup(`lat: ${item.latitude}, long: ${item.longitude}`).openPopup();
+                console.log(item);
+                bounds.extend(latlong)
+                mymap.fitBounds(bounds)
+           }
+    </script>
+</body>
+</html>

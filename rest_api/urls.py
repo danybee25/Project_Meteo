@@ -8,5 +8,5 @@ urlpatterns = [
     path('mountain/<str:pk>', views.per_mountain_data, name='mountain'),
     path('mountain-update/<str:pk>', views.update_mountain_data, name='mountain-update'),
     path('mountain-delete/<str:pk>', views.delete_mountain_data, name='mountain-delete'),
-    path('mountain-search/<str:pk>', views.search_mountain_data, name='mountain-update')
+
 ]

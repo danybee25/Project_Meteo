@@ -54,12 +54,6 @@ def update_mountain_data(request, pk):
     return Response(serializer.data)
 
 
-@api_view(['POST'])
-def search_mountain_data(request, name):
-    mountain_data = MountainData.objects.get(name=name)
-    serializer = MountainDataSerializer(mountain_data, many=True)
-    return Response(serializer.data)
-
 
 @api_view(['DELETE'])
 def delete_mountain_data(request, pk):

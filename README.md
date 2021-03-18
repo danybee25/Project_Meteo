@@ -27,3 +27,6 @@
 - To migrate use the following command
 
     docker exec -it project_meteo_web_1 python manage.py migrate --noinput
+    
+- URL 
+http://127.0.0.1:8000/
